@@ -184,7 +184,13 @@ function initializeFilterUI(availableYears, availableVenues) {
         yearStartSelect.append($("<option>").val(year).text(year));
         yearEndSelect.append($("<option>").val(year).text(year));
     }
-    yearStartSelect.find("option:first").prop("selected", true);
+    /* set the start year to 10 years before the last year (inclusive) if possible */
+    const lastYear = +availableYears[availableYears.length - 1];
+    if (availableYears.includes(lastYear - 10)) {
+        yearStartSelect.val(lastYear - 10);
+    } else {
+        yearStartSelect.find("option:first").prop("selected", true);
+    }
     yearEndSelect.find("option:last").prop("selected", true);
     yearStartSelect.on("change", updateYears);
     yearEndSelect.on("change", updateYears);
