@@ -1,6 +1,11 @@
 
 
 class Filter {
+    years_: Array<object>;
+    venues_: Array<object>;
+    yearColumn_: string;
+    venueColumn_: string;
+
     constructor(years, venues, yearColumn = "year", venueColumn = "venue_acronym") {
         this.years_ = years;
         this.venues_ = venues;
@@ -15,12 +20,13 @@ class Filter {
 }
 
 class Dataset {
+    data_: Array<object>;
 
-    constructor(dataObj) {
+    constructor(dataObj: Array<object>) {
         this.data_ = dataObj;
     }
 
-    getUnique(column, removeEmptyStr = true) {
+    getUnique(column: string, removeEmptyStr: boolean = true) {
         const uniq = new Set(this.data_.map(d => d[column]));
         if (removeEmptyStr) {
             uniq.delete('');
@@ -28,7 +34,7 @@ class Dataset {
         return Array.from(uniq);
     }
 
-    getFilteredData(filter) {
+    getFilteredData(filter: Filter|null) {
         if (filter)
             return this.data_.filter(d => filter.isValid(d));
         else
@@ -50,7 +56,7 @@ class Dataset {
      *          year: [2010, 2011, 2012]
      *      }
     */
-    getColumnsByAuthor(columns, filter = null) {
+    getColumnsByAuthor(columns: Array<string>, filter: Filter|null = null) {
         let data = this.getFilteredData(filter);
 
         let byAuthorTable = {};
@@ -68,12 +74,13 @@ class Dataset {
 
                 /* add self-citations */
                 row["selfCitations"] = +author["selfCitations"] || 0;
-                if (("referenceCount" in row) && row["referenceCount"] > 0) {
-                    row["selfCitationPercent"] = row["selfCitations"] / row["referenceCount"] * 100.0;
+                if (("referenceCount" in row) && +row["referenceCount"] > 0) {
+                    row["selfCitationPercent"] = row["selfCitations"] / +row["referenceCount"] * 100.0;
                 } else {
                     row["selfCitationPercent"] = 0.0;
                 }
 
+                /* add coAuthors */
                 if (columns.includes("coAuthors")) {
                     for (let coAuthor of row["authors"]) {
                         if (coAuthor["name"] != authorName) {

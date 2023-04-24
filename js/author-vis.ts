@@ -4,8 +4,9 @@
  * @date April 2023
  */
 
+// @ts-ignore Import module
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { Dataset, Filter } from './dataset.js';
+import { Dataset, Filter } from './dataset.min.js';
 
 const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount"];
 const BOOL_COLUMNS = ["isOpenAccess", "is_retracted"];
@@ -52,13 +53,13 @@ const IS_COLUMN_ORDERABLE = {
 };
 const INITIAL_VENUES = ["SC", "IPDPS", "HPDC", "ICS", "PPoPP"];
 
-let dataset = null;
+let dataset: Dataset | null = null;
 let datatable = null;
 
-$(document).ready(function () {
+$(function () {
     $("#load").show();
 
-    d3.csv("/data/site-data.csv", function(d) {
+    d3.csv("/data/site-data.csv", function(d: object) {
         for (const col of NUMERIC_COLUMNS) d[col] = +d[col];
         for (const col of BOOL_COLUMNS) d[col] = +(d[col] === "True");
         for (const col of OBJECT_COLUMNS) {
@@ -67,7 +68,7 @@ $(document).ready(function () {
             }
         }
         return d;
-    }).then(data => {
+    }).then((data: Array<object>) => {
         /* create global dataset */
         dataset = new Dataset(data);
 
@@ -81,7 +82,7 @@ $(document).ready(function () {
     });
 });
 
-function updateAuthorList(filter = null) {
+function updateAuthorList(filter: Filter|null = null) {
     $("#load").show();
 
     /* what columns are we showing */
@@ -92,11 +93,11 @@ function updateAuthorList(filter = null) {
 
     /* compute totals for each author; also create JSONL style array with data */
     const KEY_COL_NAME = "Name";
-    let authorTable = [];
+    let authorTable: Array<any> = [];
     for (const [authorName, metricObj] of Object.entries(byAuthor)) {
         let numValues = 0;
         let hIndex = 0;
-        if (CITATION_COLUMN in metricObj) {
+        if (CITATION_COLUMN in (metricObj as object)) {
             hIndex = getHIndex(metricObj[CITATION_COLUMN]);
         }
         for (const [metricName, metricValues] of Object.entries(metricObj)) {
@@ -110,7 +111,7 @@ function updateAuthorList(filter = null) {
         metricObj["hIndex"] = hIndex;
         metricObj["coAuthors"] = metricObj["coAuthors"].size;
 
-        let row = [0, authorName];
+        let row: Array<any> = [0, authorName];
         for (const c of columns) {
             row.push(metricObj[c]);
         }
@@ -129,13 +130,13 @@ function updateAuthorList(filter = null) {
             columns: FULL_COLUMNS.map(c => getDataTableColumnSpec(c)),
             order: [[FULL_COLUMNS.indexOf(INITIAL_SORTED_COLUMN), 'desc']],
             pageLength: 25,
-            fnRowCallback: function (nRow, aData, iDisplayIndex) {
+            rowCallback: function (nRow, aData, iDisplayIndex) {
                 let table = $(this).DataTable();
                 let info = table.page.info();
                 if (table.order()[0][1] === "desc") {
-                    $("td:nth-child(1)", nRow).html(info.start + iDisplayIndex + 1);
+                    $("td:nth-child(1)", nRow).html(String(info.start + iDisplayIndex + 1));
                 } else {
-                    $("td:nth-child(1)", nRow).html(info.recordsTotal - info.start - iDisplayIndex);
+                    $("td:nth-child(1)", nRow).html(String(info.recordsTotal - info.start - iDisplayIndex));
                 }
                 return nRow;
             },
@@ -146,13 +147,13 @@ function updateAuthorList(filter = null) {
 }
 
 function addTooltipsToTableHeader() {
-    $("#list-view__table thead th").each(function(idx) {
+    $("#list-view__table thead th").each(function(idx: number) {
         let colName = DISPLAY_COLUMNS[idx-2];
         $(this).attr("title", COLUMN_DESCRIPTIONS[colName]);
     });
 }
 
-function getDataTableColumnSpec(columnName) {
+function getDataTableColumnSpec(columnName: string): object {
     let spec = { title: READABLE_COLUMN_NAME_MAP[columnName] };
     if (columnName in COLUMN_RENDERER_MAP) {
         spec["render"] = COLUMN_RENDERER_MAP[columnName];
@@ -161,7 +162,7 @@ function getDataTableColumnSpec(columnName) {
     return spec;
 }
 
-function getHIndex(citations) {
+function getHIndex(citations: Array<number>): number {
     citations.sort(function(a,b) { return b - a; });
 
     let hIndex = 0;
@@ -175,7 +176,7 @@ function getHIndex(citations) {
     return hIndex;
 }
 
-function initializeFilterUI(availableYears, availableVenues) {
+function initializeFilterUI(availableYears: Array<number>, availableVenues: Array<string>) {
     /* years */
     availableYears.sort();
     let yearStartSelect = $("#years-filter-start");
@@ -217,7 +218,7 @@ function initializeFilterUI(availableYears, availableVenues) {
         );
         venueForm.append(checkbox);
     }
-    $("#venues-form input").on("change", function() { updateAuthorList(getFilter(), false); });
+    $("#venues-form input").on("change", function() { updateAuthorList(getFilter()); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
 }
 
@@ -225,15 +226,15 @@ function rotateCaret(element) {
     $(element).find("i").toggleClass("fa-circle-chevron-right fa-circle-chevron-down");
 }
 
-function getAllSelectValues(selector) {
-    let values = [];
+function getAllSelectValues(selector: string): Array<any> {
+    let values: Array<any> = [];
     $(`${selector} option`).each(function() {
         values.push($(this).val());
     });
     return values;
 }
 
-function getFilter() {
+function getFilter(): Filter {
     /* get selected years */
     const startYear = +$("#years-filter-start").find(":selected").val();
     const endYear = +$("#years-filter-end").find(":selected").val();
