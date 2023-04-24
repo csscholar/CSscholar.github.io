@@ -34,7 +34,7 @@ class Dataset {
         return Array.from(uniq);
     }
 
-    getFilteredData(filter: Filter) {
+    getFilteredData(filter: Filter|null) {
         if (filter)
             return this.data_.filter(d => filter.isValid(d));
         else
@@ -56,7 +56,7 @@ class Dataset {
      *          year: [2010, 2011, 2012]
      *      }
     */
-    getColumnsByAuthor(columns: Array<string>, filter: Filter = null) {
+    getColumnsByAuthor(columns: Array<string>, filter: Filter|null = null) {
         let data = this.getFilteredData(filter);
 
         let byAuthorTable = {};
