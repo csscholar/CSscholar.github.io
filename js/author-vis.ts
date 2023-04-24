@@ -4,8 +4,9 @@
  * @date April 2023
  */
 
+// @ts-ignore Import module
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
-import { Dataset, Filter } from './dataset.js';
+import { Dataset, Filter } from './dataset.min.js';
 
 const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount"];
 const BOOL_COLUMNS = ["isOpenAccess", "is_retracted"];
@@ -96,7 +97,7 @@ function updateAuthorList(filter = null) {
     for (const [authorName, metricObj] of Object.entries(byAuthor)) {
         let numValues = 0;
         let hIndex = 0;
-        if (CITATION_COLUMN in metricObj) {
+        if (CITATION_COLUMN in (metricObj as object)) {
             hIndex = getHIndex(metricObj[CITATION_COLUMN]);
         }
         for (const [metricName, metricValues] of Object.entries(metricObj)) {
@@ -129,13 +130,13 @@ function updateAuthorList(filter = null) {
             columns: FULL_COLUMNS.map(c => getDataTableColumnSpec(c)),
             order: [[FULL_COLUMNS.indexOf(INITIAL_SORTED_COLUMN), 'desc']],
             pageLength: 25,
-            fnRowCallback: function (nRow, aData, iDisplayIndex) {
+            rowCallback: function (nRow, aData, iDisplayIndex) {
                 let table = $(this).DataTable();
                 let info = table.page.info();
                 if (table.order()[0][1] === "desc") {
-                    $("td:nth-child(1)", nRow).html(info.start + iDisplayIndex + 1);
+                    $("td:nth-child(1)", nRow).html(String(info.start + iDisplayIndex + 1));
                 } else {
-                    $("td:nth-child(1)", nRow).html(info.recordsTotal - info.start - iDisplayIndex);
+                    $("td:nth-child(1)", nRow).html(String(info.recordsTotal - info.start - iDisplayIndex));
                 }
                 return nRow;
             },
@@ -217,7 +218,7 @@ function initializeFilterUI(availableYears, availableVenues) {
         );
         venueForm.append(checkbox);
     }
-    $("#venues-form input").on("change", function() { updateAuthorList(getFilter(), false); });
+    $("#venues-form input").on("change", function() { updateAuthorList(getFilter()); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
 }
 
