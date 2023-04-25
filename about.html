@@ -26,7 +26,6 @@
     <!-- Core theme CSS (includes Bootstrap)-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <!-- Our CSS -->
     <link rel="stylesheet" href="/css/author-vis.css" />
@@ -42,14 +41,14 @@
                 aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Ranking</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/about.html">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/index.html">Ranking</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">About</a></li>
                 </ul>
             </div>
         </div>
     </nav>
     <!-- Page content-->
-    <div class="container-fluid mt-3 p-4">
+    <div class="container mt-3 p-4">
         <div class="row">
             <div class="col-lg-9">
                 <!-- Post content-->
@@ -57,71 +56,30 @@
                     <!-- Post header-->
                     <header class="mb-4">
                         <!-- Post title-->
-                        <h1 class="fw-bolder mb-1">CSscholar Rankings</h1>
+                        <h1 class="fw-bolder mb-1">About CSscholar</h1>
                         <!-- Post meta content-->
-                        <div class="text-muted fst-italic mb-2">Updated on April 19, 2023</div>
+                        <div class="text-muted fst-italic mb-2">Updated on April 25, 2023</div>
                     </header>
                     <!-- Preview image figure-->
 
                     <!-- Post content-->
                     <section class="mb-5" style="overflow-x: auto;">
-                        <div id="list-view" style="width: 98%;">
-                            <div id="load"></div>
-                            <table id="list-view__table" class="table table-striped">
-                            </table>
-                        </div>
+                        <p>
+                            A list of computer science researchers in different areas that includes several
+                            metrics for study: h-index, number of publications, citations, self-citations, 
+                            influential citations, and number of co-authors.
+                            The list can be used to explore research output from different researchers and
+                            find influential researchers in different areas.
+                        </p>
+                        <p>
+                            The data is collected from <a href="https://dblp.org/">DBLP</a>,
+                            <a href="https://docs.openalex.org/">SemanticScholar</a>,
+                            and <a href="https://docs.openalex.org/">OpenAlex</a>. 
+                            The site is open-source and can be found on <a href="https://github.com/csscholar/CSscholar.github.io">GitHub</a>.
+                        </p>
                     </section>
                 </article>
 
-            </div>
-            <!-- Side widgets-->
-            <div class="col-lg-3">
-                <!-- Years widget -->
-                <div class="card mb-4">
-                    <div class="card-header">Years</div>
-                    <div class="card-body">
-                        <div class="form-grid" id="years-form">
-                            <label>Start</label>
-                            <select id="years-filter-start"></select>
-                            <label>End</label>
-                            <select id="years-filter-end"></select>
-                        </div>
-                    </div>
-                </div>
-                <!-- Fields and Venues widget-->
-                <div class="card mb-4">
-                    <div class="card-header">Fields & Venues</div>
-                    <div class="card-body" id="venues-form">
-                        <div>
-                            <a class="area-dropdown" data-bs-toggle="collapse" href="#venues-form-hpc" role="button"
-                                aria-expanded="false" aria-controls="venues-form-hpc">
-                                <i class="fa fa-circle-chevron-right" style="padding-right: 5px;"></i>HPC
-                            </a>
-                        </div>
-                        <div class="venue-list form-grid collapse" id="venues-form-hpc">
-                        </div>
-                    </div>
-                </div>
-                <!-- Data description and coverage -->
-                <div class="card mb-4">
-                    <div class="card-header">Data Used</div>
-                    <div class="card-body">
-                        <h4>Description</h4>
-                        <p>
-                            The data used in this table was collected from
-                            <a href="https://dblp.org/">DBLP</a>,
-                            <a href="https://docs.openalex.org/">SemanticScholar</a>,
-                            and <a href="https://docs.openalex.org/">OpenAlex</a>.
-                            The data set was last updated on 2023-04-19.
-                        </p>
-                        <h4>Coverage</h4>
-                        <p>
-                            The dataset includes 12,508 DOIs.
-                            SemanticScholar is missing data for 228 DOIs and OpenAlex for 4 DOIs.
-                            Additionally, SC 2018, HPDC 2013, and ISC 2010-2012 are missing entirely.
-                        </p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -138,11 +96,9 @@
         integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.js"></script>
-    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 
     <!-- Our JS-->
-    <script src="/js/author-vis.min.js" type="module"></script>
+    
 </body>
 
 </html>
