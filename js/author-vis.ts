@@ -10,7 +10,6 @@ import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 import papaparse from 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm';
 import { Dataset, Filter } from './dataset.min.js';
 
-const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount", "authors_selfCitations"];
 const CITATION_COLUMN = "citationCount";
 const INITIAL_SORTED_COLUMN = "hIndex";
 const DISPLAY_COLUMNS = ["hIndex", "count", CITATION_COLUMN, "authors_selfCitations", 
