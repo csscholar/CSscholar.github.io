@@ -42,9 +42,9 @@ class Dataset {
     }
 
     groupBy(column: string, filter: Filter|null = null): object {
-        let data = this.getFilteredData(filter);
         let groups = {};
-        for (let row of data) {
+        for (let row of this.data_) {
+            if (filter && !filter.isValid(row)) continue;
             let key = row[column];
             if (!(key in groups)) {
                 groups[key] = [];
@@ -71,6 +71,7 @@ class Dataset {
     */
     getColumnsByAuthor(columns: Array<string>, filter: Filter|null = null): object {
         let data = this.groupBy("authors_name", filter);
+        let coAuthors = this.getUniqueCoAuthors(filter);
 
         /* compute selfCitationPercent */
         for (let [author, pubs] of Object.entries(data)) {
@@ -82,12 +83,38 @@ class Dataset {
                 }
             }
             data[author] = convertArrayToObjectOfLists(pubs);
+            data[author]["coAuthors"] = coAuthors[author];
 
             /* only keep columns in data[author] */
             getColumnSubset(data[author], columns);
         }
 
         return data;
+    }
+
+    getUniqueCoAuthors(filter: Filter|null = null): object {
+        let data = this.groupBy("doi", filter);
+
+        let coAuthors = {}; // key: author name, value: set of co-authors
+        for (let authors of Object.values(data)) {
+            for (let authorRow of authors) {
+                let authorName = authorRow["authors_name"];
+                if (!(authorName in coAuthors)) {
+                    coAuthors[authorName] = new Set();
+                }
+                for (let coAuthor of authors) {
+                    if (coAuthor["authors_name"] != authorName) {
+                        coAuthors[authorName].add(coAuthor["authors_name"]);
+                    }
+                }
+            }
+        }
+
+        /* convert sets to set size */
+        for (let [author, coAuthorSet] of Object.entries(coAuthors)) {
+            coAuthors[author] = (coAuthorSet as Set<string>).size;
+        }
+        return coAuthors;
     }
 }
 

@@ -35,7 +35,7 @@ const COLUMN_DESCRIPTIONS = {
 };
 const COLUMN_AGG_FUNC = {
     default: d3.sum,
-    coAuthors: d3.count,
+    coAuthors: (x) => x,
     selfCitationPercent: d3.median,
 };
 const COLUMN_RENDERER_MAP = {
@@ -91,6 +91,7 @@ function updateAuthorList(filter: Filter|null = null) {
             hIndex = getHIndex(metricObj[CITATION_COLUMN]);
         }
         for (const [metricName, metricValues] of Object.entries(metricObj)) {
+            if (!Array.isArray(metricValues)) continue;
             numValues = metricValues.length;
             let aggFunc = (metricName in COLUMN_AGG_FUNC) ? COLUMN_AGG_FUNC[metricName] : COLUMN_AGG_FUNC["default"];
             metricObj[metricName] = aggFunc(metricValues);
@@ -98,7 +99,6 @@ function updateAuthorList(filter: Filter|null = null) {
         /* add paper count */
         metricObj["count"] = numValues;
         metricObj["hIndex"] = hIndex;
-        metricObj["coAuthors"] = 0;//metricObj["coAuthors"].size;
 
         let row: Array<any> = [0, authorName];
         for (const c of columns) {
