@@ -1,0 +1,99 @@
+#main {
+    display: grid;
+    grid-template-columns: 1fr 4fr;
+}
+
+.plot > svg {
+    margin: 10px auto;
+    display: block;
+    padding: 10px;
+    border: 1px solid grey;
+}
+
+.paper-list {
+    width: 75%;
+    height: 800px;
+    overflow-y: scroll;
+    margin: 5px auto 5px auto;
+}
+
+.paper-item {
+    display: grid;
+    grid-template-columns: 125px auto auto;
+    grid-template-rows: 1fr auto auto;
+    padding: 5px 0px 0px 0px;
+    border-top: 1px solid #000;
+    font-family: "Sans Serif";
+}
+
+.paper-header {
+    display: grid;
+    grid-template-columns: 125px auto;
+    padding: 4px 0px 0px 0px;
+    border-top: 1px solid #000;
+    font-family: "Sans Serif";
+    font-weight: bold;
+    font-size: 16pt;
+}
+
+.paper-item__citation-count {
+    grid-column-start: 1;
+    grid-column-end: 1;
+    grid-row-start: 1;
+    grid-row-end: 3;
+    font-size: 16pt;
+    margin: auto auto;
+}
+
+.paper-item__title {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 1;
+    grid-row-end: 1;
+    font-size: 16pt;
+}
+
+.paper-item__venue {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 3;
+    grid-row-end: 3;
+    font-size: 12pt;
+}
+
+.paper-item__author-list {
+    grid-column-start: 2;
+    grid-column-end: 2;
+    grid-row-start: 2;
+    grid-row-end: 2;
+    font-size: 12pt;
+}
+
+#settings {
+    border: 2px solid #000;
+    border-radius: 5px;
+    font-family: "Sans Serif";
+    font-size: 16pt;
+    height: fit-content;
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    top: 10px;
+}
+  
+.sub-setting {
+    border: 1px solid #000;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 10px;
+}
+
+.settings-checkbox {
+    height: 16px;
+    width: 16px;
+    margin: 0 8px 0 5px;
+}
+
+.sub-setting select {
+    font-family: "Sans Serif";
+    font-size: 16pt;
+}

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-17NGZBYR3W"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-17NGZBYR3W');
+    </script>
+
+    <!-- meta data -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>CSscholar</title>
+    <!-- Favicon-->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <link rel="stylesheet" href="/css/pubs-vis.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"
+        integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://rawgit.com/jasondavies/d3-cloud/master/build/d3.layout.cloud.js"></script>
+</head>
+
+<body>
+    <!-- Responsive navbar-->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#!"><span style="color: #7fffd4;">CS</span>scholar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/index/html">Ranking</a></li>
+                    <li class="nav-item"><a class="nav-link active" aria-current="page"
+                            href="/pubs-vis.html">Publications</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#!">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <h1 style="font-family: Sans Serif;">HPC Publications:</h1>
+    <div id="main">
+        <!-- settings -->
+        <div id="settings">
+            <form id="settings__venues">
+                <fieldset class="sub-setting">
+                    <legend>Venues</legend>
+                </fieldset>
+            </form>
+
+            <form id="settings__years">
+                <fieldset class="sub-setting">
+                    <legend>Years</legend>
+                </fieldset>
+            </form>
+
+            <form id="settings__papers-count">
+                <fieldset class="sub-setting">
+                    <legend># Papers</legend>
+                    <select id="settings__papers-count__selection">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    in list
+                </fieldset>
+            </form>
+
+            <form id="settings__authors">
+                <fieldset class="sub-setting">
+                    <legend>Plot</legend>
+                    <label>Y-Axis</label>
+                    <select id="settings__yaxis">
+                        <option value="citations" selected>Citations</option>
+                        <option value="citation rate">Citation Rate</option>
+                        <option value="references">References</option>
+                        <option value="# authors"># Authors</option>
+                        <option value="papers">Papers</option>
+                    </select>
+                    <br /> <br />
+                    <label>X-Axis</label>
+                    <select id="settings__xaxis">
+                        <option value="Publication Title" selected>Venue</option>
+                        <option value="Authors">Author</option>
+                        <option value="Author Affiliations">Author Affiliations</option>
+                        <option value="Author Keywords">Author Keywords</option>
+                    </select>
+                    <br /> <br />
+                    <label>Agg</label>
+                    <select id="settings__agg">
+                        <option value="none">None</option>
+                        <option value="total" selected>Total</option>
+                        <option value="mean">Mean</option>
+                        <option value="median">Median</option>
+                        <option value="min">Min</option>
+                        <option value="max">Max</option>
+                        <option value="h-index">H-Index</option>
+                    </select>
+                </fieldset>
+            </form>
+        </div>
+
+        <div id="visualizations">
+            <!-- list of top papers -->
+            <div class="paper-list">
+                <div class="paper-header">
+                    <div class="paper-item__citation-count">Citations</div>
+                    <div class="paper-item__title">Paper</div>
+                </div>
+            </div>
+            <br>
+
+            <!-- general plot -->
+            <div id="main-plot" class="plot"></div>
+
+            <!-- citations by venue plots -->
+            <div id="total-citations-by-venue" class="plot"></div>
+            <div id="average-citations-by-venue" class="plot"></div>
+            <div id="citations-by-venue" class="plot"></div>
+
+            <!-- by author plots -->
+            <div id="by-author" class="plot"></div>
+
+            <!-- by institution plots -->
+            <div id="by-institution" class="plot"></div>
+
+            <!-- by keyword plots -->
+            <div id="by-keyword" class="plot"></div>
+
+            <!-- abstract word cloud -->
+            <!--<div id="abstract-word-cloud" class="plot"></div>-->
+        </div>
+    </div>
+
+    <script src="/js/pubs-vis.js"></script>
+</body>
+
+</html>
