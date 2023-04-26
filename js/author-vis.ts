@@ -6,6 +6,8 @@
 
 // @ts-ignore Import module
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+// @ts-ignore Import module
+import papaparse from 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm';
 import { Dataset, Filter } from './dataset.min.js';
 
 const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount", "authors_selfCitations"];
@@ -54,20 +56,24 @@ let datatable = null;
 $(function () {
     $("#load").show();
 
-    d3.csv("/data/site-data.csv", function(d: object) {
-        for (const col of NUMERIC_COLUMNS) d[col] = +d[col];
-        return d;
-    }).then((data: Array<object>) => {
-        /* create global dataset */
-        dataset = new Dataset(data);
+    papaparse.parse("/data/site-data.csv", {
+        "download": true,
+        "delimiter": ",",
+        "header": true,
+        "fastMode": true,
+        "dynamicTyping": true,
+        "complete": (results: object) => {
+            /* create global dataset */
+            dataset = new Dataset(results["data"]);
 
-        /* create UI elements */
-        const uniqueYears = dataset.getUnique("year").filter(d => d != 0);
-        const uniqueVenues = dataset.getUnique("venue_acronym_acronym");
-        initializeFilterUI(uniqueYears, uniqueVenues);
+            /* create UI elements */
+            const uniqueYears = dataset.getUnique("year").filter(d => d != 0);
+            const uniqueVenues = dataset.getUnique("venue_acronym_acronym");
+            initializeFilterUI(uniqueYears, uniqueVenues);
 
-        /* create table */
-        updateAuthorList(getFilter());
+            /* create table */
+            updateAuthorList(getFilter());
+        }
     });
 });
 
@@ -79,7 +85,6 @@ function updateAuthorList(filter: Filter|null = null) {
 
     /* preprocess author data */
     let byAuthor = dataset.getColumnsByAuthor(columns, filter);
-    console.log(byAuthor);
 
     /* compute totals for each author; also create JSONL style array with data */
     const KEY_COL_NAME = "Name";
