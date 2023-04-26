@@ -8,24 +8,19 @@
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
 import { Dataset, Filter } from './dataset.min.js';
 
-const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount"];
-const BOOL_COLUMNS = ["isOpenAccess", "is_retracted"];
-const OBJECT_COLUMNS = ["authors"];
+const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount", "authors_selfCitations"];
 const CITATION_COLUMN = "citationCount";
 const INITIAL_SORTED_COLUMN = "hIndex";
-const DISPLAY_COLUMNS = ["hIndex", "count", CITATION_COLUMN, "selfCitations", 
+const DISPLAY_COLUMNS = ["hIndex", "count", CITATION_COLUMN, "authors_selfCitations", 
                         "selfCitationPercent", "influentialCitationCount", "coAuthors"];
 const READABLE_COLUMN_NAME_MAP = {
     Position: "Position",
     Name: "Name", 
     citationCount: "Citations",
-    cited_by_count: "Citations",
     influentialCitationCount: "Influential Citations",
-    selfCitations: "Self Citations",
+    authors_selfCitations: "Self Citations",
     selfCitationPercent: "Median Self Citation %",
     coAuthors: "No. Co-Authors",
-    isOpenAccess: "No. Open Access",
-    is_retracted: "No. Retractions",
     count: "No. Papers",
     hIndex: "H-Index",
 };
@@ -33,7 +28,7 @@ const COLUMN_DESCRIPTIONS = {
     hIndex: "At least h papers have at least h citations",
     count: "Total number of papers",
     citationCount: "Total number of citations (as reported by SemanticScholar)",
-    selfCitations: "Total number of self-citations (derived from SemanticScholar)",
+    authors_selfCitations: "Total number of self-citations (derived from SemanticScholar)",
     selfCitationPercent: "Median percentage of self-citations per-paper (derived from SemanticScholar)",
     influentialCitationCount: "Total number of influential citations (as reported by SemanticScholar https://www.semanticscholar.org/faq#influential-citations)",
     coAuthors: "Total number of unique Co-Authors",
@@ -61,12 +56,6 @@ $(function () {
 
     d3.csv("/data/site-data.csv", function(d: object) {
         for (const col of NUMERIC_COLUMNS) d[col] = +d[col];
-        for (const col of BOOL_COLUMNS) d[col] = +(d[col] === "True");
-        for (const col of OBJECT_COLUMNS) {
-            if (d[col]) {
-                d[col] = JSON.parse(d[col]);
-            }
-        }
         return d;
     }).then((data: Array<object>) => {
         /* create global dataset */
@@ -74,7 +63,7 @@ $(function () {
 
         /* create UI elements */
         const uniqueYears = dataset.getUnique("year").filter(d => d != 0);
-        const uniqueVenues = dataset.getUnique("venue_acronym");
+        const uniqueVenues = dataset.getUnique("venue_acronym_acronym");
         initializeFilterUI(uniqueYears, uniqueVenues);
 
         /* create table */
@@ -90,6 +79,7 @@ function updateAuthorList(filter: Filter|null = null) {
 
     /* preprocess author data */
     let byAuthor = dataset.getColumnsByAuthor(columns, filter);
+    console.log(byAuthor);
 
     /* compute totals for each author; also create JSONL style array with data */
     const KEY_COL_NAME = "Name";
@@ -101,7 +91,6 @@ function updateAuthorList(filter: Filter|null = null) {
             hIndex = getHIndex(metricObj[CITATION_COLUMN]);
         }
         for (const [metricName, metricValues] of Object.entries(metricObj)) {
-            if (!Array.isArray(metricValues)) continue;
             numValues = metricValues.length;
             let aggFunc = (metricName in COLUMN_AGG_FUNC) ? COLUMN_AGG_FUNC[metricName] : COLUMN_AGG_FUNC["default"];
             metricObj[metricName] = aggFunc(metricValues);
@@ -109,7 +98,7 @@ function updateAuthorList(filter: Filter|null = null) {
         /* add paper count */
         metricObj["count"] = numValues;
         metricObj["hIndex"] = hIndex;
-        metricObj["coAuthors"] = metricObj["coAuthors"].size;
+        metricObj["coAuthors"] = 0;//metricObj["coAuthors"].size;
 
         let row: Array<any> = [0, authorName];
         for (const c of columns) {

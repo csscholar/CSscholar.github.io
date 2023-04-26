@@ -6,7 +6,7 @@ class Filter {
     yearColumn_: string;
     venueColumn_: string;
 
-    constructor(years, venues, yearColumn = "year", venueColumn = "venue_acronym") {
+    constructor(years, venues, yearColumn = "year", venueColumn = "venue_acronym_acronym") {
         this.years_ = years;
         this.venues_ = venues;
         this.yearColumn_ = yearColumn;
@@ -41,6 +41,19 @@ class Dataset {
             return this.data_;
     }
 
+    groupBy(column: string, filter: Filter|null = null): object {
+        let data = this.getFilteredData(filter);
+        let groups = {};
+        for (let row of data) {
+            let key = row[column];
+            if (!(key in groups)) {
+                groups[key] = [];
+            }
+            groups[key].push(row);
+        }
+        return groups;
+    }
+
     /**
      * Returns a table of data grouped by author.
      * @param {Array} columns - The columns to group by author.
@@ -56,49 +69,57 @@ class Dataset {
      *          year: [2010, 2011, 2012]
      *      }
     */
-    getColumnsByAuthor(columns: Array<string>, filter: Filter|null = null) {
-        let data = this.getFilteredData(filter);
+    getColumnsByAuthor(columns: Array<string>, filter: Filter|null = null): object {
+        let data = this.groupBy("authors_name", filter);
 
-        let byAuthorTable = {};
-        for (let row of data) {
-            for (const author of row["authors"]) {
-                const authorName = author["name"];
-
-                /* create new entry for author if it doesn't exist */
-                if (!(authorName in byAuthorTable)) {
-                    byAuthorTable[authorName] = Object.fromEntries(columns.map(k => [k, []]));
-                    if (columns.includes("coAuthors")) {
-                        byAuthorTable[authorName]["coAuthors"] = new Set();
-                    }
-                }
-
-                /* add self-citations */
-                row["selfCitations"] = +author["selfCitations"] || 0;
-                if (("referenceCount" in row) && +row["referenceCount"] > 0) {
-                    row["selfCitationPercent"] = row["selfCitations"] / +row["referenceCount"] * 100.0;
+        /* compute selfCitationPercent */
+        for (let [author, pubs] of Object.entries(data)) {
+            for (let pub of pubs) {
+                if (+pub["referenceCount"] != 0) {
+                    pub["selfCitationPercent"] = pub["authors_selfCitations"] / +pub["referenceCount"] * 100.0;
                 } else {
-                    row["selfCitationPercent"] = 0.0;
-                }
-
-                /* add coAuthors */
-                if (columns.includes("coAuthors")) {
-                    for (let coAuthor of row["authors"]) {
-                        if (coAuthor["name"] != authorName) {
-                            byAuthorTable[authorName]["coAuthors"].add(coAuthor["name"]);
-                        }
-                    }
-                }
-
-                /* add data to table */
-                for (let col of columns) {
-                    if (col !== "coAuthors")
-                        byAuthorTable[authorName][col].push(row[col]);
+                    pub["selfCitationPercent"] = 0;
                 }
             }
+            data[author] = convertArrayToObjectOfLists(pubs);
+
+            /* only keep columns in data[author] */
+            getColumnSubset(data[author], columns);
         }
-        return byAuthorTable;
+
+        return data;
     }
 }
+
+function getColumnSubset(obj: object, columns: Array<string>) {
+    for (let col of Object.keys(obj)) {
+        if (!columns.includes(col)) {
+            delete obj[col];
+        }
+    }
+}
+
+/**
+ * Converts an array of objects to an object of lists.
+ * @param {Array} arr - The array of objects to convert.
+ * @returns {Object} - An object of lists.
+ */
+function convertArrayToObjectOfLists(arr: Array<any>): object {
+    const objOfLists = {};
+
+    arr.forEach(obj => {
+        Object.keys(obj).forEach(key => {
+            if (objOfLists[key] === undefined) {
+                objOfLists[key] = [obj[key]];
+            } else {
+                objOfLists[key].push(obj[key]);
+            }
+        });
+    });
+
+    return objOfLists;
+}
+
 
 
 export { Dataset, Filter };
