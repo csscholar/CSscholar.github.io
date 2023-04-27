@@ -55,7 +55,7 @@ let datatable = null;
 $(function () {
     $("#load").show();
 
-    papaparse.parse("/data/all.csv", {
+    papaparse.parse("/data/site-data.csv", {
         "download": true,
         "delimiter": ",",
         "header": true,
