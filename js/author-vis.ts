@@ -6,26 +6,22 @@
 
 // @ts-ignore Import module
 import * as d3 from 'https://cdn.jsdelivr.net/npm/d3@7/+esm';
+// @ts-ignore Import module
+import papaparse from 'https://cdn.jsdelivr.net/npm/papaparse@5.4.1/+esm';
 import { Dataset, Filter } from './dataset.min.js';
 
-const NUMERIC_COLUMNS = ["year", "referenceCount", "citationCount", "influentialCitationCount"];
-const BOOL_COLUMNS = ["isOpenAccess", "is_retracted"];
-const OBJECT_COLUMNS = ["authors"];
 const CITATION_COLUMN = "citationCount";
 const INITIAL_SORTED_COLUMN = "hIndex";
-const DISPLAY_COLUMNS = ["hIndex", "count", CITATION_COLUMN, "selfCitations", 
-                        "selfCitationPercent", "influentialCitationCount", "coAuthors"];
+const DISPLAY_COLUMNS = ["hIndex", "count", CITATION_COLUMN, "authors_selfCitations", 
+                        "authors_selfCitationsPercent", "influentialCitationCount", "coAuthors"];
 const READABLE_COLUMN_NAME_MAP = {
     Position: "Position",
     Name: "Name", 
     citationCount: "Citations",
-    cited_by_count: "Citations",
     influentialCitationCount: "Influential Citations",
-    selfCitations: "Self Citations",
-    selfCitationPercent: "Median Self Citation %",
+    authors_selfCitations: "Self Citations",
+    authors_selfCitationsPercent: "Median Self Citation %",
     coAuthors: "No. Co-Authors",
-    isOpenAccess: "No. Open Access",
-    is_retracted: "No. Retractions",
     count: "No. Papers",
     hIndex: "H-Index",
 };
@@ -33,18 +29,18 @@ const COLUMN_DESCRIPTIONS = {
     hIndex: "At least h papers have at least h citations",
     count: "Total number of papers",
     citationCount: "Total number of citations (as reported by SemanticScholar)",
-    selfCitations: "Total number of self-citations (derived from SemanticScholar)",
-    selfCitationPercent: "Median percentage of self-citations per-paper (derived from SemanticScholar)",
+    authors_selfCitations: "Total number of self-citations (derived from SemanticScholar)",
+    authors_selfCitationsPercent: "Median percentage of self-citations per-paper (derived from SemanticScholar)",
     influentialCitationCount: "Total number of influential citations (as reported by SemanticScholar https://www.semanticscholar.org/faq#influential-citations)",
     coAuthors: "Total number of unique Co-Authors",
 };
 const COLUMN_AGG_FUNC = {
     default: d3.sum,
-    coAuthors: d3.count,
-    selfCitationPercent: d3.median,
+    coAuthors: (x) => x,
+    authors_selfCitationsPercent: d3.median,
 };
 const COLUMN_RENDERER_MAP = {
-    selfCitationPercent: $.fn.dataTable.render.number(',', '.', 1, ''),
+    authors_selfCitationsPercent: $.fn.dataTable.render.number(',', '.', 1, ''),
 };
 const IS_COLUMN_ORDERABLE = {
     default: true,
@@ -59,26 +55,25 @@ let datatable = null;
 $(function () {
     $("#load").show();
 
-    d3.csv("/data/site-data.csv", function(d: object) {
-        for (const col of NUMERIC_COLUMNS) d[col] = +d[col];
-        for (const col of BOOL_COLUMNS) d[col] = +(d[col] === "True");
-        for (const col of OBJECT_COLUMNS) {
-            if (d[col]) {
-                d[col] = JSON.parse(d[col]);
-            }
+    papaparse.parse("/data/site-data.csv", {
+        "download": true,
+        "delimiter": ",",
+        "header": true,
+        "fastMode": true,
+        "dynamicTyping": true,
+        "complete": (results: object) => {
+            /* create global dataset */
+            dataset = new Dataset(results["data"]);
+
+            /* create UI elements */
+            const uniqueYears = dataset.getUnique("year");
+            const venueMap = dataset.getVenuesByArea();
+            initializeYearsFilterUI(uniqueYears);
+            initializeVenuesFilterUI(venueMap);
+
+            /* create table */
+            updateAuthorList(getFilter());
         }
-        return d;
-    }).then((data: Array<object>) => {
-        /* create global dataset */
-        dataset = new Dataset(data);
-
-        /* create UI elements */
-        const uniqueYears = dataset.getUnique("year").filter(d => d != 0);
-        const uniqueVenues = dataset.getUnique("venue_acronym");
-        initializeFilterUI(uniqueYears, uniqueVenues);
-
-        /* create table */
-        updateAuthorList(getFilter());
     });
 });
 
@@ -109,7 +104,6 @@ function updateAuthorList(filter: Filter|null = null) {
         /* add paper count */
         metricObj["count"] = numValues;
         metricObj["hIndex"] = hIndex;
-        metricObj["coAuthors"] = metricObj["coAuthors"].size;
 
         let row: Array<any> = [0, authorName];
         for (const c of columns) {
@@ -176,8 +170,7 @@ function getHIndex(citations: Array<number>): number {
     return hIndex;
 }
 
-function initializeFilterUI(availableYears: Array<number>, availableVenues: Array<string>) {
-    /* years */
+function initializeYearsFilterUI(availableYears: Array<number>) {
     availableYears.sort();
     let yearStartSelect = $("#years-filter-start");
     let yearEndSelect = $("#years-filter-end");
@@ -195,31 +188,71 @@ function initializeFilterUI(availableYears: Array<number>, availableVenues: Arra
     yearEndSelect.find("option:last").prop("selected", true);
     yearStartSelect.on("change", updateYears);
     yearEndSelect.on("change", updateYears);
+}
 
-    /* venues */
-    let venueForm = $("#venues-form-hpc");
-    for (const venue of availableVenues) {
-        let checkbox = $("<div>")
-            .addClass("form-check")
-            .append(
-            $("<input>")
-                .addClass("settings-checkbox")
+function initializeVenuesFilterUI(venueMap: object) {
+
+    const sortedAreas = Object.keys(venueMap).sort();
+    let filterElement = $("#venues-form");
+
+    for (let area of sortedAreas) {
+        let id = `venues-form-${area}`;
+        let areaDiv = $("<div>");
+        let areaHeader = $("<a>")
+                .addClass("area-dropdown")
+                .attr("id", `areas-dropdown__${area}`)
+                .attr("data-bs-toggle", "collapse")
+                .attr("href", `#${id}`)
+                .attr("role", "button")
+                .attr("aria-expanded", "false")
+                .attr("aria-controls", id)
+                .html(`<i class="fa fa-circle-chevron-right"></i> ${area}`);
+        let areaCheckBox = $("<input>")
+                .addClass("settings-checkbox form-check-inline area-checkbox")
                 .attr("type", "checkbox")
-                .attr("id", `venues__${venue}`)
-                .attr("name", "venue")
-                .attr("value", venue)
-                .addClass("form-check-input")
-                .prop('checked', (INITIAL_VENUES.includes(venue)))
-        ).append(
-            $("<label>")
-                .attr("for", `venues__${venue}`)
-                .addClass("form-check-label")
-                .text(venue)
-        );
-        venueForm.append(checkbox);
+                .attr("id", `areas__${area}`)
+                .attr("value", area as string);
+        let areaDropDown = $("<div>")
+                .addClass("venue-list form-grid collapse")
+                .attr("id", id);
+
+        const sortedVenues = Array.from(venueMap[area]).sort();
+        for (let venue of sortedVenues) {
+            let checkbox = $("<div>")
+                .addClass("form-check")
+                .append(
+                    $("<input>")
+                        .addClass("settings-checkbox form-check-input venue-checkbox")
+                        .attr("type", "checkbox")
+                        .attr("id", `venues__${venue}`)
+                        .attr("name", "venue")
+                        .attr("value", venue as string)
+                        .prop('checked', (INITIAL_VENUES.includes(venue as string)))
+                ).append(
+                    $("<label>")
+                        .attr("for", `venues__${venue}`)
+                        .addClass("form-check-label")
+                        .text(venue as string)
+                );
+            areaDropDown.append(checkbox);
+        }
+        
+        areaDiv.append(areaHeader, areaCheckBox, areaDropDown);
+        filterElement.append(areaDiv);
     }
-    $("#venues-form input").on("change", function() { updateAuthorList(getFilter()); });
+
+    $("#venues-form .venue-checkbox").on("change", function() { updateAuthorList(getFilter()); });
+    $("#venues-form .area-checkbox").on("change", function() { updateSelectedAreas(this); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
+
+    $("#areas-dropdown__HPC")[0].click();
+}
+
+function updateSelectedAreas(element) {
+    let venues = $(element).parent().find(".venue-checkbox");
+    let isChecked = $(element).prop("checked");
+    $(venues).each(function() { $(this).prop("checked", isChecked); });
+    updateAuthorList(getFilter());
 }
 
 function rotateCaret(element) {

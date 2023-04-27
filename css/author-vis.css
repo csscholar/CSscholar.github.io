@@ -11,8 +11,13 @@
     margin-right: 15px;
 }
 
+.area-checkbox {
+    margin-left: 6px;
+}
+
 .area-dropdown {
     color: #000;
+    grid-column: 0 0;
 }
 
 .area-dropdown:hover {
