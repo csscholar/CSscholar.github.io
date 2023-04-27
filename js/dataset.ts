@@ -6,7 +6,7 @@ class Filter {
     yearColumn_: string;
     venueColumn_: string;
 
-    constructor(years, venues, yearColumn = "year", venueColumn = "venue_acronym_acronym") {
+    constructor(years, venues, yearColumn = "year", venueColumn = "venue_acronym") {
         this.years_ = years;
         this.venues_ = venues;
         this.yearColumn_ = yearColumn;
@@ -54,6 +54,14 @@ class Dataset {
         return groups;
     }
 
+    getVenuesByArea(filter: Filter|null = null): object {
+        let data = this.groupBy("area", filter);
+        for (let [area, group] of Object.entries(data)) {
+            data[area] = new Set(group.map(d => d["venue_acronym"]));
+        }
+        return data;
+    }
+
     /**
      * Returns a table of data grouped by author.
      * @param {Array} columns - The columns to group by author.
@@ -75,13 +83,6 @@ class Dataset {
 
         /* compute selfCitationPercent */
         for (let [author, pubs] of Object.entries(data)) {
-            for (let pub of pubs) {
-                if (+pub["referenceCount"] != 0) {
-                    pub["selfCitationPercent"] = pub["authors_selfCitations"] / +pub["referenceCount"] * 100.0;
-                } else {
-                    pub["selfCitationPercent"] = 0;
-                }
-            }
             data[author] = convertArrayToObjectOfLists(pubs);
             data[author]["coAuthors"] = coAuthors[author];
 
