@@ -10,7 +10,7 @@ all: $(TARGETS)
 
 %.js: %.ts 
 	@echo "Compiling $<..."
-	tsc $< --target es6 --lib es6,dom,es2019
+	tsc $< --target es6 --lib es6,dom,es2019 --typeRoots /usr/lib/node_modules/@types
 
 clean:
 	rm -f $(TARGETS)
