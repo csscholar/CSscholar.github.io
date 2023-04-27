@@ -207,7 +207,7 @@ function initializeVenuesFilterUI(venueMap: object) {
                 .attr("aria-controls", id)
                 .html(`<i class="fa fa-circle-chevron-right"></i> ${area}`);
         let areaCheckBox = $("<input>")
-                .addClass("settings-checkbox form-check-input area-checkbox")
+                .addClass("settings-checkbox form-check-inline area-checkbox")
                 .attr("type", "checkbox")
                 .attr("id", `areas__${area}`)
                 .attr("value", area as string);
@@ -235,13 +235,21 @@ function initializeVenuesFilterUI(venueMap: object) {
                 );
             areaDropDown.append(checkbox);
         }
-
-        areaDiv.append(areaHeader, areaDropDown);
+        
+        areaDiv.append(areaHeader, areaCheckBox, areaDropDown);
         filterElement.append(areaDiv);
     }
 
-    $("#venues-form input").on("change", function() { updateAuthorList(getFilter()); });
+    $("#venues-form .venue-checkbox").on("change", function() { updateAuthorList(getFilter()); });
+    $("#venues-form .area-checkbox").on("change", function() { updateSelectedAreas(this); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
+}
+
+function updateSelectedAreas(element) {
+    let venues = $(element).parent().find(".venue-checkbox");
+    let isChecked = $(element).prop("checked");
+    $(venues).each(function() { $(this).prop("checked", isChecked); });
+    updateAuthorList(getFilter());
 }
 
 function rotateCaret(element) {
