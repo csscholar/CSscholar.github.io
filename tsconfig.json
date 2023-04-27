@@ -1,0 +1,7 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "lib": ["es6", "dom", "es2019"],
+        "typeRoots": ["/usr/lib/node_modules/@types"],
+    }
+}
