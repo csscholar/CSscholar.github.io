@@ -246,8 +246,6 @@ function initializeVenuesFilterUI(venueMap: object) {
     $("#venues-form .venue-checkbox").on("change", function() { updateAuthorList(getFilter()); });
     $("#venues-form .area-checkbox").on("change", function() { updateSelectedAreas(this); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
-
-    //$("#areas-dropdown__HPC")[0].click();
 }
 
 function updateSelectedAreas(element) {
