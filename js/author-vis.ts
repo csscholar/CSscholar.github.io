@@ -47,7 +47,8 @@ const IS_COLUMN_ORDERABLE = {
     Position: false,
     Name: false,
 };
-const INITIAL_VENUES = ["SC", "IPDPS", "HPDC", "ICS", "PPoPP"];
+const INITIAL_VENUES = ["SC", "IPDPS", "ISC", "ICS", "PPoPP", "HPDC", "CLUSTER", "ICPP", "EuroPar", "CCGRID", "HiPC"];
+const INITIAL_AREAS = ["HPC"];
 
 let dataset: Dataset | null = null;
 let datatable = null;
@@ -211,7 +212,8 @@ function initializeVenuesFilterUI(venueMap: object) {
                 .addClass("settings-checkbox form-check-inline area-checkbox")
                 .attr("type", "checkbox")
                 .attr("id", `areas__${area}`)
-                .attr("value", area as string);
+                .attr("value", area as string)
+                .prop("checked", INITIAL_AREAS.includes(area as string));
         let areaDropDown = $("<div>")
                 .addClass("venue-list form-grid collapse")
                 .attr("id", id);
@@ -227,7 +229,7 @@ function initializeVenuesFilterUI(venueMap: object) {
                         .attr("id", `venues__${venue}`)
                         .attr("name", "venue")
                         .attr("value", venue as string)
-                        .prop('checked', (INITIAL_VENUES.includes(venue as string)))
+                        .prop('checked', INITIAL_VENUES.includes(venue as string))
                 ).append(
                     $("<label>")
                         .attr("for", `venues__${venue}`)
@@ -245,7 +247,7 @@ function initializeVenuesFilterUI(venueMap: object) {
     $("#venues-form .area-checkbox").on("change", function() { updateSelectedAreas(this); });
     $(".area-dropdown").on("click", function() { rotateCaret(this); });
 
-    $("#areas-dropdown__HPC")[0].click();
+    //$("#areas-dropdown__HPC")[0].click();
 }
 
 function updateSelectedAreas(element) {
