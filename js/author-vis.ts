@@ -49,6 +49,18 @@ const IS_COLUMN_ORDERABLE = {
 };
 const INITIAL_VENUES = ["SC", "IPDPS", "ISC", "ICS", "PPoPP", "HPDC", "CLUSTER", "ICPP", "EuroPar", "CCGRID", "HiPC"];
 const INITIAL_AREAS = ["HPC"];
+const AREA_READABLE_NAME_MAP = {
+    "HPC": "High Performance Computing",
+    "COMPBIO": "Computational Biology",
+    "ARCH": "Architecture",
+    "SE": "Software Engineering",
+    "VIS": "Visualization",
+    "PL": "Programming Languages",
+    "NLP": "Natural Language Processing",
+    "DB": "Databases",
+    "ML": "Machine Learning",
+    "CV": "Computer Vision",
+};
 
 let dataset: Dataset | null = null;
 let datatable = null;
@@ -198,6 +210,7 @@ function initializeVenuesFilterUI(venueMap: object) {
 
     for (let area of sortedAreas) {
         let id = `venues-form-${area}`;
+        const text = (area in AREA_READABLE_NAME_MAP) ? AREA_READABLE_NAME_MAP[area] : area;
         let areaDiv = $("<div>");
         let areaHeader = $("<a>")
                 .addClass("area-dropdown")
@@ -207,7 +220,7 @@ function initializeVenuesFilterUI(venueMap: object) {
                 .attr("role", "button")
                 .attr("aria-expanded", "false")
                 .attr("aria-controls", id)
-                .html(`<i class="fa fa-circle-chevron-right"></i> ${area}`);
+                .html(`<i class="fa fa-circle-chevron-right"></i> ${text}`);
         let areaCheckBox = $("<input>")
                 .addClass("settings-checkbox form-check-inline area-checkbox")
                 .attr("type", "checkbox")
