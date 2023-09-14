@@ -60,6 +60,7 @@ const AREA_READABLE_NAME_MAP = {
     "DB": "Databases",
     "ML": "Machine Learning",
     "CV": "Computer Vision",
+    "SEC": "Computer Security",
 };
 
 let dataset: Dataset | null = null;
