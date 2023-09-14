@@ -60,6 +60,7 @@ const AREA_READABLE_NAME_MAP = {
     "DB": "Databases",
     "ML": "Machine Learning",
     "CV": "Computer Vision",
+    "NET": "Networking and Communication",
     "SEC": "Computer Security",
 };
 
