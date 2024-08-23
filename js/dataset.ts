@@ -94,7 +94,7 @@ class Dataset {
     }
 
     getUniqueCoAuthors(filter: Filter|null = null): object {
-        let data = this.groupBy("doi", filter);
+        let data = this.groupBy("dblp", filter);
 
         let coAuthors = {}; // key: author name, value: set of co-authors
         for (let authors of Object.values(data)) {

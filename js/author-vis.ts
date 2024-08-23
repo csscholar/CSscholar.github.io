@@ -120,7 +120,10 @@ function updateAuthorList(filter: Filter|null = null) {
         metricObj["count"] = numValues;
         metricObj["hIndex"] = hIndex;
 
-        let row: Array<any> = [0, authorName];
+        /* clean dblp author name -- remove trailing digits */
+        const cleanedName = authorName.replace(/\d+$/, "");
+
+        let row: Array<any> = [0, cleanedName];
         for (const c of columns) {
             row.push(metricObj[c]);
         }
